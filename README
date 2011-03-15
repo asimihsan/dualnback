@@ -1,0 +1,6 @@
+The Dual N-Back task is a game that stresses the portion of the brain responsible for short-term, working memory. A psychological study has demonstrated that improving one's performance in this task has tranferrable, dosage-dependent gains in other tasks that measure "fluid intelligence" (i.e. get better at this task, become more intelligent).
+
+Please refer to "Improving fluid intelligence with training on working memory" by Jaeggi et. al in PNAS, March 2008, for more information (http://www.pnas.org/content/105/19/6829).
+
+For now, please note that, until I publish this as an app in the Android Market and state otherwise, the entirety of the code base is brittle, under-documented, and subject to massive change without notice.
+
