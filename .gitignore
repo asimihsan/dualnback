@@ -1,3 +1,6 @@
-bin/*
+bin/*.dex
+bin/*.ap_
+bin/com/
+bin/ec/
 local.properties
 
