@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.gyrovague.dualnback;
 
@@ -20,7 +20,7 @@ import android.webkit.WebViewClient;
  * @author ai
  *
  */
-public class InstructionsActivity extends Activity {    
+public class InstructionsActivity extends Activity {
     private WebView mBrowser;
     private Context mContext = this;
     private boolean mGameLaunched = false;
@@ -30,11 +30,11 @@ public class InstructionsActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         final String SUB_TAG = "onCreate";
         Log.d(TAG+SUB_TAG, "entry");
-        super.onCreate(savedInstanceState);   
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.instructions);
         mBrowser = (WebView)findViewById(R.id.web_instructions);
         mBrowser.setWebViewClient(new Callback());
-        
+
         AssetManager asset_manager = getAssets();
         InputStream input_stream = null;
         try {
@@ -43,19 +43,19 @@ public class InstructionsActivity extends Activity {
             Log.e(TAG+SUB_TAG, e.getMessage());
         }
         String data = readTextFile(input_stream);
-        
+
         // the baseUrl argument is arbitrary, and just necessary to be able to access images
         // packaged as assets in the HTML.
         mBrowser.loadDataWithBaseURL("file:///android_asset/", data, "text/html", "UTF-8", "");
     }
-    
+
     @Override
     public void onPause() {
         final String SUB_TAG = "onPause";
         Log.d(TAG+SUB_TAG, "entry");
-        super.onPause();     
+        super.onPause();
     }
-    
+
     @Override
     public void onResume() {
         final String SUB_TAG = "onResume";
@@ -66,25 +66,25 @@ public class InstructionsActivity extends Activity {
             finish();
         } // if (mGameLaunched)
     } // public void onResume()
-    
+
     private class Callback extends WebViewClient {
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             final String SUB_TAG = "urlClick";
             Log.d(TAG+SUB_TAG, "entry");
-            
+
             // Don't care what link got clicked, start the game.
-            Intent intent = new Intent(Intent.ACTION_VIEW);            
+            Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setClassName(mContext, GameActivity.class.getName());
             startActivity(intent);
             mGameLaunched = true;
-            
+
             // We've handled this URL loading, so return true.
             return(true);
-            
+
         } // public boolean shouldOverrideUrlLoading(WebView view, String url)
-        
+
     } // private class Callback extends WebViewClient
-    
+
     private String readTextFile(InputStream inputStream) {
         // ref: http://thedevelopersinfo.com/2009/11/17/using-assets-in-android/
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -97,9 +97,9 @@ public class InstructionsActivity extends Activity {
             outputStream.close();
             inputStream.close();
         } catch (IOException e) {
-            
+
         }
         return outputStream.toString();
     } // private String readTextFile(InputStream inputStream)
-    
+
 } // public class InstructionsActivity extends Activity
