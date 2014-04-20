@@ -45,19 +45,19 @@ public class GameActivity extends Activity {
     /**
      * Message types handled by and sent to the main UI thread.
      */
-    public static final int MSG_TYPE_NEW_TRIAL		= 1;
-    public static final int MSG_TYPE_GUESS_AUDIO	= 2;
-    public static final int MSG_TYPE_GUESS_VISUAL 	= 3;
-    public static final int MSG_TYPE_GUESS_BOTH		= 4;
-    public static final int MSG_TYPE_HALT_VISUAL	= 5;
-    public static final int MSG_TYPE_HALT_AUDIO		= 6;
-    public static final int MSG_TYPE_DRAWING_DONE	= 7;
-    public static final int MSG_TYPE_CREATE		    = 8;
-    public static final int MSG_TYPE_INITIALIZE		= 9;
-    public static final int MSG_TYPE_INITIALIZE_DONE	= 10;
-    public static final int MSG_TYPE_NEW_BLOCK		= 11;
-    public static final int MSG_TYPE_END_OF_DAY		= 12;
-    public static final int MSG_TYPE_GUESS_NONE		= 13;
+    public static final int MSG_TYPE_NEW_TRIAL         = 1;
+    public static final int MSG_TYPE_GUESS_AUDIO       = 2;
+    public static final int MSG_TYPE_GUESS_VISUAL      = 3;
+    public static final int MSG_TYPE_GUESS_BOTH        = 4;
+    public static final int MSG_TYPE_HALT_VISUAL       = 5;
+    public static final int MSG_TYPE_HALT_AUDIO        = 6;
+    public static final int MSG_TYPE_DRAWING_DONE      = 7;
+    public static final int MSG_TYPE_CREATE            = 8;
+    public static final int MSG_TYPE_INITIALIZE        = 9;
+    public static final int MSG_TYPE_INITIALIZE_DONE   = 10;
+    public static final int MSG_TYPE_NEW_BLOCK         = 11;
+    public static final int MSG_TYPE_END_OF_DAY        = 12;
+    public static final int MSG_TYPE_GUESS_NONE        = 13;
     public static final int[] ALL_MESSAGE_TYPES = new int[] {MSG_TYPE_NEW_TRIAL, MSG_TYPE_GUESS_AUDIO, MSG_TYPE_GUESS_VISUAL, MSG_TYPE_GUESS_BOTH,
             MSG_TYPE_HALT_VISUAL, MSG_TYPE_HALT_AUDIO, MSG_TYPE_DRAWING_DONE, MSG_TYPE_CREATE,
             MSG_TYPE_INITIALIZE, MSG_TYPE_INITIALIZE_DONE, MSG_TYPE_NEW_BLOCK, MSG_TYPE_END_OF_DAY,
@@ -67,21 +67,21 @@ public class GameActivity extends Activity {
     /**
      * States that the activity can be in.
      */
-    private static final int ACT_STATE_INITIALIZING		 = 1;
-    private static final int ACT_STATE_LOADING			 = 2;
-    private static final int ACT_STATE_LOADED			 = 3;
-    private static final int ACT_STATE_WAITING_FOR_GUESS = 4;
-    private static final int ACT_STATE_RECEIVED_GUESS	 = 5;
-    private static final int ACT_STATE_REDRAWING		 = 6;
-    private static final int ACT_STATE_REDRAWN 			 = 7;
-    private static final int ACT_STATE_LOST_FOCUS		 = 8;
-    private static final int ACT_STATE_CREATING			 = 9;
-    private static final int ACT_STATE_WAIT_FOR_ALERT_INTERVAL		 = 10;
-    private static final int ACT_STATE_CREATED			 = 11;
-    private static final int ACT_STATE_STOP				 = 12;
+    private static final int ACT_STATE_INITIALIZING         = 1;
+    private static final int ACT_STATE_LOADING              = 2;
+    private static final int ACT_STATE_LOADED               = 3;
+    private static final int ACT_STATE_WAITING_FOR_GUESS    = 4;
+    private static final int ACT_STATE_RECEIVED_GUESS       = 5;
+    private static final int ACT_STATE_REDRAWING            = 6;
+    private static final int ACT_STATE_REDRAWN              = 7;
+    private static final int ACT_STATE_LOST_FOCUS           = 8;
+    private static final int ACT_STATE_CREATING             = 9;
+    private static final int ACT_STATE_WAIT_FOR_ALERT_INTERVAL         = 10;
+    private static final int ACT_STATE_CREATED              = 11;
+    private static final int ACT_STATE_STOP                 = 12;
     private int mActivityState;
 
-    private static final int DIALOG_ALERT_INTERVAL		 = 1;
+    private static final int DIALOG_ALERT_INTERVAL          = 1;
     private AlertDialog mAlertDialog;
 
     Handler mHandler = new Handler() {

@@ -1,51 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-		android:id="@+id/layout_all"
-        android:orientation="vertical"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+    android:id="@+id/layout_all"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
     
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    	android:id="@+id/layout_buttons"
-    	android:orientation="horizontal"
-    	android:layout_width="fill_parent"
-    	android:layout_height="wrap_content"
-    	android:layout_alignParentBottom="true">
-    	
-	    <Button android:id="@+id/btn_audio_only"
-	    		android:text="@+string/str_btn_audio_only"
-	    		android:padding="20.0sp"
-	    		android:typeface="normal"
-	    		android:textStyle="normal"
-	    		android:layout_width="wrap_content"
-	    		android:layout_height="wrap_content"
-	    		android:layout_alignParentLeft="true" />
-	    
-	   	<Button android:id="@+id/btn_both"
-	    		android:text="@+string/str_btn_both"
-	    		android:padding="20.0sp"
-	    		android:typeface="normal"
-	    		android:textStyle="normal"
-	    		android:layout_width="wrap_content"
-	    		android:layout_height="wrap_content"
-	    		android:layout_centerHorizontal="true" />
+      android:id="@+id/layout_buttons"
+      android:orientation="horizontal"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignParentBottom="true">
+      
+      <Button android:id="@+id/btn_audio_only"
+          android:text="@+string/str_btn_audio_only"
+          android:padding="20.0sp"
+          android:typeface="normal"
+          android:textStyle="normal"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_alignParentLeft="true" />
+      
+       <Button android:id="@+id/btn_both"
+          android:text="@+string/str_btn_both"
+          android:padding="20.0sp"
+          android:typeface="normal"
+          android:textStyle="normal"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_centerHorizontal="true" />
 
-	    <Button android:id="@+id/btn_visual_only"
-	    		android:text="@+string/str_btn_visual_only"
-	    		android:padding="20.0sp"
-	    		android:typeface="normal"
-	    		android:textStyle="normal"
-	    		android:layout_width="wrap_content"
-	    		android:layout_height="wrap_content"
-	    		android:layout_alignParentRight="true" />	    		
-	</RelativeLayout>
+      <Button android:id="@+id/btn_visual_only"
+          android:text="@+string/str_btn_visual_only"
+          android:padding="20.0sp"
+          android:typeface="normal"
+          android:textStyle="normal"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_alignParentRight="true" />          
+  </RelativeLayout>
 
     <com.gyrovague.dualnback.DrawView
-    		android:id="@+id/draw_view"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true" />
+        android:id="@+id/draw_view"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true" />
             
 </RelativeLayout>
 

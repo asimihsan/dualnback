@@ -101,15 +101,15 @@ public class SoundManager {
                 //mConsonantMediaPlayers[i] = MediaPlayer.create(mContext, mConsonantsInUse[i]);
                 /*
                 if (mConsonantMediaPlayers[i] == null) {
-                	result = false;
-                	break;
+                    result = false;
+                    break;
                 } else {
-                	mConsonantMediaPlayers[i].setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                		public void onCompletion(MediaPlayer mp) {
-                			mp.seekTo(0);
-                			isPlaying = false;
-                		}
-                	});
+                    mConsonantMediaPlayers[i].setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        public void onCompletion(MediaPlayer mp) {
+                            mp.seekTo(0);
+                            isPlaying = false;
+                        }
+                    });
                 }
                 */
             }
@@ -149,13 +149,13 @@ public class SoundManager {
             mConsonantMediaPlayers[currentSound].stop();
             /*
             try {
-            	mConsonantMediaPlayers[currentSound].prepare();
+                mConsonantMediaPlayers[currentSound].prepare();
             } catch (IllegalStateException e) {
-            	// TODO Auto-generated catch block
-            	Log.e("SoundManager::stopPlaying()", "IllegalStateException in prepare().", e);
+                // TODO Auto-generated catch block
+                Log.e("SoundManager::stopPlaying()", "IllegalStateException in prepare().", e);
             } catch (IOException e) {
-            	// TODO Auto-generated catch block
-            	Log.e("SoundManager::stopPlaying()", "IOException in prepare().", e);
+                // TODO Auto-generated catch block
+                Log.e("SoundManager::stopPlaying()", "IOException in prepare().", e);
             }
             */
         }
