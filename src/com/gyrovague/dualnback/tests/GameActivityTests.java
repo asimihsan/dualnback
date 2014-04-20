@@ -24,7 +24,7 @@ import com.gyrovague.dualnback.R;
 public class GameActivityTests extends ActivityInstrumentationTestCase2<GameActivity> {
     private DrawView mDrawView;
     private Context mContext;
-    private Button mBtnAudioOnly;
+    private Button mBtnAudio;
     private AlertDialog mAlertDialog;
 
     public GameActivityTests() {
@@ -39,7 +39,7 @@ public class GameActivityTests extends ActivityInstrumentationTestCase2<GameActi
         mContext = getInstrumentation().getTargetContext();
         GameActivity a = getActivity();
         mDrawView = (DrawView)a.findViewById(R.id.draw_view);
-        mBtnAudioOnly = (Button)a.findViewById(R.id.btn_audio_only);
+        mBtnAudio = (Button)a.findViewById(R.id.btn_audio);
         mAlertDialog = (AlertDialog)a.getmAlertDialog();
     } // protected void setUp() throws Exception
 

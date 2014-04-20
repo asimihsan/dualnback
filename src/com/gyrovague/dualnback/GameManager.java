@@ -22,8 +22,8 @@
  * was required whenever one of the presented stimuli matched the one presented n positions back in the sequence.
  * The value of n was the same for both streams of stimuli. There were six auditory and six visual targets per block
  * (four appearing in only one modality, and two appearing in both modalities simultaneously), and their positions were
- * determined randomly. Participants made responses manually by pressing on the letter ÒAÓ of a standard keyboard with
- * their left index finger for visual targets, and on the letter ÒLÓ with their right index finger for auditory targets.
+ * determined randomly. Participants made responses manually by pressing on the letter `A` of a standard keyboard with
+ * their left index finger for visual targets, and on the letter `L` with their right index finger for auditory targets.
  * No responses were required for non-targets.
  *
  * In this task, the level of difficulty was varied by changing the level of n (34), which we used to track the
@@ -32,7 +32,7 @@
  * modality, the level of n increased by 1. It was decreased by 1 if more than five mistakes were made, and in all
  * other cases, n remained unchanged.
  *
- * One training session comprised 20 blocks consisting of 20 + n trials resulting in a daily training time of Å25 min."
+ * One training session comprised 20 blocks consisting of 20 + n trials resulting in a daily training time of 25 min."
  */
 package com.gyrovague.dualnback;
 
@@ -54,6 +54,7 @@ public class GameManager {
     private int mNInterval = 1;
     private int mCurrentBlock;
     private int mCurrentTrial;
+    private int mCurrentGuess;
     private int mCurrentVisualMistakes;
     private int mCurrentAudioMistakes;
     private MersenneTwister mRNG;
@@ -89,6 +90,7 @@ public class GameManager {
 
     private void reset() {
         mCurrentBlock = 0;
+        mCurrentGuess = Guess.NONE;
     }
 
     public Trial getCurrentTrial() {
@@ -103,25 +105,30 @@ public class GameManager {
         int previous_visual = mHistoryVisual.get(mCurrentTrial - mNInterval);
         int current_audio = mHistoryAudio.get(mCurrentTrial);
         int current_visual = mHistoryVisual.get(mCurrentTrial);
-        int correct_answer;
-
-        if ((current_visual == previous_visual) && (current_audio == previous_audio)) {
-            correct_answer = Guess.BOTH;
-        } else if (current_visual == previous_visual) {
-            correct_answer = Guess.VISUAL_ONLY;
-        } else if (current_audio == previous_audio) {
-            correct_answer = Guess.AUDIO_ONLY;
-        } else {
-            correct_answer = Guess.NO_REPETITION;
+        int correct_answer = Guess.NONE;
+        if (current_visual == previous_visual) {
+            correct_answer |= Guess.VISUAL;
+        } 
+        if (current_audio == previous_audio) {
+            correct_answer |= Guess.AUDIO;
         }
-
         return correct_answer;
 
     } // private int getCurrentCorrectAnswer()
 
-    public boolean evaluateGuess(int guess) {
+    public boolean evaluatePartialGuess(int guess) {
+        mCurrentGuess |= guess;
+        
+        int correct_answer = getCurrentCorrectAnswer();
+        int common = guess & correct_answer;
+        boolean is_guess_correct = (common != 0);
+        
+        return is_guess_correct;
+    }
+
+    public boolean evaluateGuess() {
         final String SUB_TAG = "::evaluateGuess()";
-        Log.d(TAG + SUB_TAG, "entry.  guess: " + guess);
+        Log.d(TAG + SUB_TAG, "entry.  guess: " + mCurrentGuess);
         boolean guessable = (mCurrentTrial > (mNInterval - 1)) ? true : false;
         Log.d(TAG + SUB_TAG, "mCurrentTrial: " + mCurrentTrial + ", mNInterval: " + mNInterval + ", guessable: " + guessable);
         if (!guessable) {
@@ -130,36 +137,19 @@ public class GameManager {
         }
 
         int correct_answer = getCurrentCorrectAnswer();
-        boolean is_guess_correct = (guess == correct_answer);
+        
+        boolean is_guess_correct = (mCurrentGuess == correct_answer);
         if (!is_guess_correct) {
-            switch (correct_answer) {
-            case Guess.BOTH:
-                mCurrentVisualMistakes++;
-                mCurrentAudioMistakes++;
-                break;
-            case Guess.VISUAL_ONLY:
-                mCurrentVisualMistakes++;
-                break;
-            case Guess.AUDIO_ONLY:
-                mCurrentAudioMistakes++;
-                break;
-            case Guess.NO_REPETITION:
-                switch (guess) {
-                case Guess.BOTH:
-                    mCurrentVisualMistakes++;
-                    mCurrentAudioMistakes++;
-                    break;
-                case Guess.AUDIO_ONLY:
-                    mCurrentAudioMistakes++;
-                    break;
-                case Guess.VISUAL_ONLY:
-                    mCurrentVisualMistakes++;
-                    break;
-                } // switch (guess)
-                break;
-            } // switch (correct_answer)
+            int delta = mCurrentGuess ^ correct_answer;
+            if ((delta & Guess.VISUAL) != 0) {
+                mCurrentVisualMistakes ++;
+            }
+            if ((delta & Guess.AUDIO) != 0) {
+                mCurrentAudioMistakes ++;
+            }
         } // if (!is_guess_correct)
 
+        mCurrentGuess = Guess.NONE;
         mCurrentTrial++;
         return is_guess_correct;
     }

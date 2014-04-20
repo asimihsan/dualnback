@@ -18,14 +18,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import ec.util.MersenneTwister;
+import android.graphics.Color;
 
 public class GameActivity extends Activity {
     private static String TAG = "GameActivity";
     private SoundManager mSoundManager;
     private DrawView mDrawView;
-    private Button mButtonAudioOnly;
-    private Button mButtonVisualOnly;
-    private Button mButtonBoth;
+    private Button mButtonAudio;
+    private Button mButtonVisual;
     private Button[] mAllButtons;
     private Resources mResources;
     private Activity me = this;
@@ -48,7 +48,7 @@ public class GameActivity extends Activity {
     public static final int MSG_TYPE_NEW_TRIAL         = 1;
     public static final int MSG_TYPE_GUESS_AUDIO       = 2;
     public static final int MSG_TYPE_GUESS_VISUAL      = 3;
-    public static final int MSG_TYPE_GUESS_BOTH        = 4;
+    public static final int MSG_TYPE_GUESS_VALIDATE    = 4;
     public static final int MSG_TYPE_HALT_VISUAL       = 5;
     public static final int MSG_TYPE_HALT_AUDIO        = 6;
     public static final int MSG_TYPE_DRAWING_DONE      = 7;
@@ -57,11 +57,9 @@ public class GameActivity extends Activity {
     public static final int MSG_TYPE_INITIALIZE_DONE   = 10;
     public static final int MSG_TYPE_NEW_BLOCK         = 11;
     public static final int MSG_TYPE_END_OF_DAY        = 12;
-    public static final int MSG_TYPE_GUESS_NONE        = 13;
-    public static final int[] ALL_MESSAGE_TYPES = new int[] {MSG_TYPE_NEW_TRIAL, MSG_TYPE_GUESS_AUDIO, MSG_TYPE_GUESS_VISUAL, MSG_TYPE_GUESS_BOTH,
+    public static final int[] ALL_MESSAGE_TYPES = new int[] {MSG_TYPE_NEW_TRIAL, MSG_TYPE_GUESS_AUDIO, MSG_TYPE_GUESS_VISUAL, MSG_TYPE_GUESS_VALIDATE,
             MSG_TYPE_HALT_VISUAL, MSG_TYPE_HALT_AUDIO, MSG_TYPE_DRAWING_DONE, MSG_TYPE_CREATE,
-            MSG_TYPE_INITIALIZE, MSG_TYPE_INITIALIZE_DONE, MSG_TYPE_NEW_BLOCK, MSG_TYPE_END_OF_DAY,
-            MSG_TYPE_GUESS_NONE
+            MSG_TYPE_INITIALIZE, MSG_TYPE_INITIALIZE_DONE, MSG_TYPE_NEW_BLOCK, MSG_TYPE_END_OF_DAY
                                                             };
 
     /**
@@ -192,7 +190,7 @@ public class GameActivity extends Activity {
             case MSG_TYPE_NEW_TRIAL:
                 Log.d(TAG+SUB_TAG, "MSG_TYPE_NEW_TRIAL. mActivityState: " + mActivityState);
                 mAlertDialog = null;
-                mHandler.removeMessages(MSG_TYPE_GUESS_NONE);
+                mHandler.removeMessages(MSG_TYPE_GUESS_VALIDATE);
                 //setAllButtonsEnabledState(true);
 
                 try {
@@ -228,7 +226,7 @@ public class GameActivity extends Activity {
                     mActivityState = ACT_STATE_REDRAWN;
                     mSoundManager.playSound(mCurrentTrial.audio);
                     mHandler.sendEmptyMessageDelayed(MSG_TYPE_HALT_VISUAL, 500);
-                    mHandler.sendEmptyMessageDelayed(MSG_TYPE_GUESS_NONE, 3000);
+                    mHandler.sendEmptyMessageDelayed(MSG_TYPE_GUESS_VALIDATE, 3000);
 
                     if (mCurrentTrial.guessable) {
                         //setAllButtonsEnabledState(true);
@@ -245,16 +243,19 @@ public class GameActivity extends Activity {
 
             case MSG_TYPE_GUESS_AUDIO:
             case MSG_TYPE_GUESS_VISUAL:
-            case MSG_TYPE_GUESS_BOTH:
-            case MSG_TYPE_GUESS_NONE:
-                Log.d("Handler::handleMessage()", "MSG_TYPE_GUESS_ " + msg.what + ", mActivityState: " + mActivityState);
-                if ((mActivityState == ACT_STATE_WAITING_FOR_GUESS) ||
-                        ((mActivityState == ACT_STATE_REDRAWN) && (msg.what == MSG_TYPE_GUESS_NONE))) {
+                if (mActivityState == ACT_STATE_WAITING_FOR_GUESS) {
                     Log.d("Handler::handleMessage()", "Accept guess.");
                     processMessageGuess(msg.what);
                 }
                 break;
-
+            case MSG_TYPE_GUESS_VALIDATE:
+                Log.d("Handler::handleMessage()", "MSG_TYPE_GUESS_ " + msg.what + ", mActivityState: " + mActivityState);
+                if ((mActivityState == ACT_STATE_WAITING_FOR_GUESS) ||
+                        (mActivityState == ACT_STATE_REDRAWN)) {
+                    Log.d("Handler::handleMessage()", "Accept guess.");
+                    validateGuess();
+                }
+                break;
             case MSG_TYPE_HALT_VISUAL:
                 if ((mActivityState == ACT_STATE_WAITING_FOR_GUESS) || (mActivityState == ACT_STATE_REDRAWN)) {
                     mDrawView.disableAllSquares();
@@ -296,28 +297,22 @@ public class GameActivity extends Activity {
         mDrawView.setmHandlerUI(mHandler);
         mDrawView = (DrawView)findViewById(R.id.draw_view);
         mDrawView.setmHandlerUI(mHandler);
-        mButtonAudioOnly = (Button)findViewById(R.id.btn_audio_only);
-        mButtonVisualOnly = (Button)findViewById(R.id.btn_visual_only);
-        mButtonBoth = (Button)findViewById(R.id.btn_both);
-        mAllButtons = new Button[] {mButtonAudioOnly, mButtonVisualOnly, mButtonBoth};
+        mButtonAudio = (Button)findViewById(R.id.btn_audio);
+        mButtonVisual = (Button)findViewById(R.id.btn_visual);
+        mAllButtons = new Button[] {mButtonAudio, mButtonVisual};
         //setAllButtonsEnabledState(false);
 
         // ------------------------------------------------------------------------------------------------------
         // Set up button click listeners.
         // ------------------------------------------------------------------------------------------------------
-        mButtonAudioOnly.setOnClickListener(new View.OnClickListener() {
+        mButtonAudio.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 mHandler.sendEmptyMessage(MSG_TYPE_GUESS_AUDIO);
             }
         });
-        mButtonVisualOnly.setOnClickListener(new View.OnClickListener() {
+        mButtonVisual.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 mHandler.sendEmptyMessage(MSG_TYPE_GUESS_VISUAL);
-            }
-        });
-        mButtonBoth.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                mHandler.sendEmptyMessage(MSG_TYPE_GUESS_BOTH);
             }
         });
         // ------------------------------------------------------------------------------------------------------
@@ -377,6 +372,24 @@ public class GameActivity extends Activity {
         } // for (Button button : mAllButtons)
     } // public void setAllButtonsEnabledState(boolean state)
 
+    
+    public void setButtonFeedback(Button button, boolean isCorrect) {
+        Log.d("Main::setButtonFeedback()", "entry");
+        if (isCorrect) {
+            button.setBackgroundColor(Color.GREEN);
+        }
+        else {
+            button.setBackgroundColor(Color.RED);
+        }
+    } // public void setAllButtonsEnabledState(boolean state)
+    
+   public void resetButtonsFeedback() {
+        Log.d("Main::resetButtonsFeedback()", "entry");
+        for (Button button : mAllButtons) {
+            button.setBackgroundResource(android.R.drawable.btn_default);
+        }
+    }
+    
     private void disableAll() {
         Log.d("Main::disableAll()", "entry");
         if (mSoundManager != null) {
@@ -389,36 +402,39 @@ public class GameActivity extends Activity {
     } // private void disableAll()
 
     private void processMessageGuess(int msg_type) {
-        final String SUB_TAG = "::processMessageGuess";
-        Log.d("Main::processMessageGuess()", "entry");
+        final String SUB_TAG = "::processPartialMessageGuess";
+        Log.d("Main::processPartialMessageGuess()", "entry");
         boolean is_correct;
-
-        mActivityState = ACT_STATE_RECEIVED_GUESS;
-        disableAll();
         switch (msg_type) {
         case MSG_TYPE_GUESS_AUDIO:
-            is_correct = mGameManager.evaluateGuess(Guess.AUDIO_ONLY);
+            is_correct = mGameManager.evaluatePartialGuess(Guess.AUDIO);
+//             setButtonFeedback(mButtonAudio, is_correct);
             break;
         case MSG_TYPE_GUESS_VISUAL:
-            is_correct = mGameManager.evaluateGuess(Guess.VISUAL_ONLY);
-            break;
-        case MSG_TYPE_GUESS_BOTH:
-            is_correct = mGameManager.evaluateGuess(Guess.BOTH);
-            break;
-        case MSG_TYPE_GUESS_NONE:
-            is_correct = mGameManager.evaluateGuess(Guess.NO_REPETITION);
+            is_correct = mGameManager.evaluatePartialGuess(Guess.VISUAL);
+//             setButtonFeedback(mButtonVisual, is_correct);
             break;
         default:
             // TODO raise exception.
             is_correct = false;
             break;
         } // switch (msg_type)
+        Log.d(TAG+SUB_TAG, "is_correct: " + is_correct);
+    }
 
+    private void validateGuess() {
+        final String SUB_TAG = "::validateGuess";
+        Log.d("Main::validateGuess()", "entry");
+        
+        mActivityState = ACT_STATE_RECEIVED_GUESS;
+        disableAll();
+//         resetButtonsFeedback();
+        boolean is_correct = mGameManager.evaluateGuess();
         Log.d(TAG+SUB_TAG, "is_correct: " + is_correct);
         mHandler.sendEmptyMessage(MSG_TYPE_NEW_TRIAL);
 
-    } // private void processMessageGuess(int msg_type)
-
+    } // private void validateGuess()
+    
     public synchronized AlertDialog getmAlertDialog() {
         String SUB_TAG = "::getmAlertDialog()";
         Log.d(TAG+SUB_TAG, "entry. mAlertDialog: " + mAlertDialog);
