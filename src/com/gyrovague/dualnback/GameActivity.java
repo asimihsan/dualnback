@@ -117,6 +117,7 @@ public class GameActivity extends Activity {
                         mGameManager = new GameManager(mRNG);
                         mGameManager.setmHandlerUI(mHandler);
                         mNInterval = mGameManager.getnInterval();
+                        
                         if (mSoundManager != null) {
                             mActivityState = ACT_STATE_CREATED;
                             mHandler.sendEmptyMessage(MSG_TYPE_INITIALIZE);
@@ -137,7 +138,6 @@ public class GameActivity extends Activity {
                 mIsGameManagerInitialized = false;
                 //setAllButtonsEnabledState(false);
                 mNInterval = mGameManager.getnInterval();
-
                 Thread initSoundManager = new Thread(new Runnable() {
                     public void run() {
                         boolean result = mSoundManager.initialize();
@@ -174,10 +174,13 @@ public class GameActivity extends Activity {
             case MSG_TYPE_INITIALIZE_DONE:
                 Log.d(TAG+SUB_TAG, "MSG_TYPE_INITIALIZE_DONE");
                 mActivityState = ACT_STATE_WAIT_FOR_ALERT_INTERVAL;
-                String message = (mNInterval == 1) ? mResources.getString(R.string.alert_current_interval_message_singular) :
-                                 mResources.getString(R.string.alert_current_interval_message_plural);
-                AlertDialog alert = Alerts.showAlert(mResources.getString(R.string.alert_current_interval_title),
-                                                     MessageFormat.format(message, mNInterval),
+                String message = "";
+                if (mGameManager.getCurrentBlock() > 0) {
+                    message += MessageFormat.format(mResources.getString(R.string.alert_rate_message), mGameManager.getRate());
+                }
+                message += MessageFormat.format(mResources.getString(R.string.alert_interval_back_message), mNInterval);
+                AlertDialog alert = Alerts.showAlert(mResources.getString(R.string.alert_new_session),
+                                                     message,
                                                      me,
                                                      mContext,
                                                      mHandler,
@@ -376,17 +379,17 @@ public class GameActivity extends Activity {
     public void setButtonFeedback(Button button, boolean isCorrect) {
         Log.d("Main::setButtonFeedback()", "entry");
         if (isCorrect) {
-            button.setBackgroundColor(Color.GREEN);
+            button.setTextColor(Color.GREEN);
         }
         else {
-            button.setBackgroundColor(Color.RED);
+            button.setTextColor(Color.RED);
         }
     } // public void setAllButtonsEnabledState(boolean state)
     
    public void resetButtonsFeedback() {
         Log.d("Main::resetButtonsFeedback()", "entry");
         for (Button button : mAllButtons) {
-            button.setBackgroundResource(android.R.drawable.btn_default);
+            button.setTextColor(Color.BLACK);
         }
     }
     
@@ -408,11 +411,11 @@ public class GameActivity extends Activity {
         switch (msg_type) {
         case MSG_TYPE_GUESS_AUDIO:
             is_correct = mGameManager.evaluatePartialGuess(Guess.AUDIO);
-//             setButtonFeedback(mButtonAudio, is_correct);
+            setButtonFeedback(mButtonAudio, is_correct);
             break;
         case MSG_TYPE_GUESS_VISUAL:
             is_correct = mGameManager.evaluatePartialGuess(Guess.VISUAL);
-//             setButtonFeedback(mButtonVisual, is_correct);
+            setButtonFeedback(mButtonVisual, is_correct);
             break;
         default:
             // TODO raise exception.
@@ -428,7 +431,7 @@ public class GameActivity extends Activity {
         
         mActivityState = ACT_STATE_RECEIVED_GUESS;
         disableAll();
-//         resetButtonsFeedback();
+        resetButtonsFeedback();
         boolean is_correct = mGameManager.evaluateGuess();
         Log.d(TAG+SUB_TAG, "is_correct: " + is_correct);
         mHandler.sendEmptyMessage(MSG_TYPE_NEW_TRIAL);

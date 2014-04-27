@@ -52,6 +52,7 @@ import ec.util.MersenneTwister;
 public class GameManager {
     private static final String TAG = "GameManager";
     private int mNInterval = 1;
+    private double mRate = 0.0;
     private int mCurrentBlock;
     private int mCurrentTrial;
     private int mCurrentGuess;
@@ -160,6 +161,8 @@ public class GameManager {
         } else if ((mCurrentVisualMistakes > UPPER_MISTAKE_LIMIT) && (mCurrentAudioMistakes > UPPER_MISTAKE_LIMIT)) {
             mNInterval = Math.max(mNInterval - 1, 1);
         }
+        mRate = 1.0 * (BLOCK_SIZE - mCurrentVisualMistakes - mCurrentAudioMistakes) / (1.0 * BLOCK_SIZE);
+        mCurrentBlock ++;
         prepareCurrentBlock();
     } // public void advanceBlock()
 
@@ -280,6 +283,10 @@ public class GameManager {
         }
         return result;
     }
+    
+    public double getRate() {
+        return mRate;
+    }
 
     public int getnInterval() {
         return mNInterval;
@@ -293,4 +300,8 @@ public class GameManager {
         this.mHandlerUI = mHandlerUI;
     }
 
+    public int getCurrentBlock() {
+        return mCurrentBlock;
+    }
+    
 }
