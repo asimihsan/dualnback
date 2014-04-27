@@ -8,6 +8,7 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -110,7 +111,9 @@ public class DrawView extends View {
                 // invisible
                 mPaint.setColor(mResources.getColor(R.drawable.transparent_background));
             }
-            canvas.drawRect(rect, mPaint);
+            RectF rectf = new RectF();
+            rectf.set(rect);
+            canvas.drawRoundRect(rectf, 5.0f, 5.0f, mPaint);
         }
 
         if (mHandlerUI != null) {
@@ -121,7 +124,7 @@ public class DrawView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         setupDrawingCoordinates();
-        mPaintWhiteCross.setStrokeWidth(mSquareSize / 16);
+        mPaintWhiteCross.setStrokeWidth(mSquareSize / 32);
     }
 
     /**
@@ -129,13 +132,13 @@ public class DrawView extends View {
      */
     private void drawWhiteCross(Canvas canvas) {
         canvas.drawLine(mRectCross.left + mRectCross.width() / 2,
-                        mRectCross.top,
+                        mRectCross.top + mRectCross.height() / 5,
                         mRectCross.left + mRectCross.width() / 2,
-                        mRectCross.bottom,
+                        mRectCross.bottom - mRectCross.height() / 5,
                         mPaintWhiteCross);
-        canvas.drawLine(mRectCross.left,
+        canvas.drawLine(mRectCross.left + mRectCross.width() / 5,
                         mRectCross.top + mRectCross.height() / 2,
-                        mRectCross.right,
+                        mRectCross.right - mRectCross.width() / 5,
                         mRectCross.top + mRectCross.height() / 2,
                         mPaintWhiteCross);
     }
