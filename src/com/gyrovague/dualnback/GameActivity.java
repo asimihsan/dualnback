@@ -8,6 +8,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -32,7 +33,6 @@ public class GameActivity extends Activity {
     private Context mContext = this;
     private GameManager mGameManager;
     private MersenneTwister mRNG;
-    private int mNInterval;
     boolean mIsSoundManagerInitialized;
     boolean mIsGameManagerInitialized;
     ProgressDialog mDialog;
@@ -41,6 +41,7 @@ public class GameActivity extends Activity {
     private PowerManager mPowerManager;
     private PowerManager.WakeLock mWakeLock;
     private static long[] VIBRATE_PATTERN = new long[] { 250, 250, };
+    public static final String PREFS_NAME = "prefs";
 
     /**
      * Message types handled by and sent to the main UI thread.
@@ -116,7 +117,11 @@ public class GameActivity extends Activity {
                     public void run() {
                         mGameManager = new GameManager(mRNG);
                         mGameManager.setmHandlerUI(mHandler);
-                        mNInterval = mGameManager.getnInterval();
+                        
+                        // restore previous level
+                        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+                        int nInterval = settings.getInt("nInterval", 1);
+                        mGameManager.setnInterval(nInterval);
                         
                         if (mSoundManager != null) {
                             mActivityState = ACT_STATE_CREATED;
@@ -137,7 +142,6 @@ public class GameActivity extends Activity {
                 mIsSoundManagerInitialized = false;
                 mIsGameManagerInitialized = false;
                 //setAllButtonsEnabledState(false);
-                mNInterval = mGameManager.getnInterval();
                 Thread initSoundManager = new Thread(new Runnable() {
                     public void run() {
                         boolean result = mSoundManager.initialize();
@@ -177,8 +181,9 @@ public class GameActivity extends Activity {
                 String message = "";
                 if (mGameManager.getCurrentBlock() > 0) {
                     message += MessageFormat.format(mResources.getString(R.string.alert_rate_message), mGameManager.getRate());
+                    message += " ";
                 }
-                message += MessageFormat.format(mResources.getString(R.string.alert_interval_back_message), mNInterval);
+                message += MessageFormat.format(mResources.getString(R.string.alert_interval_back_message), mGameManager.getnInterval());
                 AlertDialog alert = Alerts.showAlert(mResources.getString(R.string.alert_new_session),
                                                      message,
                                                      me,
@@ -367,7 +372,23 @@ public class GameActivity extends Activity {
         }
         mHandler.sendMessageAtFrontOfQueue(mHandler.obtainMessage(MSG_TYPE_END_OF_DAY));
     }
+    
+    @Override
+    protected void onStop(){
+       super.onStop();
 
+      // preferences
+      SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+      SharedPreferences.Editor editor = settings.edit();
+      
+      // save level
+      int nInterval = mGameManager.getnInterval();
+      editor.putInt("nInterval", nInterval);
+      
+      editor.commit();
+    }  
+    
+    
     public void setAllButtonsEnabledState(boolean state) {
         Log.d("Main::setAllButtonsEnabledState()", "entry");
         for (Button button : mAllButtons) {
