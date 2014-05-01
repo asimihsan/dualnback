@@ -56,15 +56,16 @@ public class GameManager {
     private int mCurrentBlock;
     private int mCurrentTrial;
     private int mCurrentGuess;
-    private int mCurrentVisualMistakes;
-    private int mCurrentAudioMistakes;
+    private int mCurrentWrongs;
+    private int mCurrentRights;
+    private int mnFallBackSessions;
     private MersenneTwister mRNG;
     private ArrayList<Integer> mHistoryVisual;
     private ArrayList<Integer> mHistoryAudio;
     private Handler mHandlerUI;
-
-    private static final int LOWER_MISTAKE_LIMIT = 3;
-    private static final int UPPER_MISTAKE_LIMIT = 5;
+    private static final double THRESHOLD_ADVANCE = 0.8;
+    private static final double THRESHOLD_FALLBACK = 0.5;
+    private static final int THRESHOLD_FALLBACK_SESSIONS = 3;
     private static final int BLOCK_SIZE = 20;
     private static final int AUDIO_TARGETS_PER_BLOCK = 6;
     private static final int VISUAL_TARGETS_PER_BLOCK = 6;
@@ -92,6 +93,7 @@ public class GameManager {
     private void reset() {
         mCurrentBlock = 0;
         mCurrentGuess = Guess.NONE;
+        mnFallBackSessions = 0;
     }
 
     public Trial getCurrentTrial() {
@@ -140,28 +142,44 @@ public class GameManager {
         int correct_answer = getCurrentCorrectAnswer();
         
         boolean is_guess_correct = (mCurrentGuess == correct_answer);
-        if (!is_guess_correct) {
-            int delta = mCurrentGuess ^ correct_answer;
-            if ((delta & Guess.VISUAL) != 0) {
-                mCurrentVisualMistakes ++;
-            }
-            if ((delta & Guess.AUDIO) != 0) {
-                mCurrentAudioMistakes ++;
-            }
-        } // if (!is_guess_correct)
-
+        
+        int common = mCurrentGuess & correct_answer;
+        if ((common & Guess.VISUAL) != 0) {
+            mCurrentRights ++;
+        }
+        if ((common & Guess.AUDIO) != 0) {
+            mCurrentRights ++;
+        }
+        
+        int delta = mCurrentGuess ^ correct_answer;
+        if ((delta & Guess.VISUAL) != 0) {
+            mCurrentWrongs ++;
+        }
+        if ((delta & Guess.AUDIO) != 0) {
+            mCurrentWrongs ++;
+        }
+        
         mCurrentGuess = Guess.NONE;
-        mCurrentTrial++;
+        mCurrentTrial ++;
         return is_guess_correct;
     }
 
     public void advanceBlock() {
-        if ((mCurrentVisualMistakes < LOWER_MISTAKE_LIMIT) && (mCurrentAudioMistakes < LOWER_MISTAKE_LIMIT)) {
-            mNInterval++;
-        } else if ((mCurrentVisualMistakes > UPPER_MISTAKE_LIMIT) && (mCurrentAudioMistakes > UPPER_MISTAKE_LIMIT)) {
-            mNInterval = Math.max(mNInterval - 1, 1);
+        mRate = 1.0 * mCurrentRights / (1.0 * mCurrentWrongs + 1.0 * mCurrentRights);
+        if (mRate >= THRESHOLD_ADVANCE) {
+            mNInterval ++;
+            mnFallBackSessions = 0;
+        } else if (mRate < THRESHOLD_FALLBACK) {
+            if (mnFallBackSessions < THRESHOLD_FALLBACK_SESSIONS) {
+              // do not fallback right away
+              mnFallBackSessions ++;
+            }
+            else {
+              // fallback
+              mNInterval = Math.max(mNInterval - 1, 1);
+              mnFallBackSessions = 0;
+            }
         }
-        mRate = 1.0 * (BLOCK_SIZE - mCurrentVisualMistakes - mCurrentAudioMistakes) / (1.0 * BLOCK_SIZE);
         mCurrentBlock ++;
         prepareCurrentBlock();
     } // public void advanceBlock()
@@ -176,8 +194,9 @@ public class GameManager {
 
     public void prepareCurrentBlock() {
         mCurrentTrial = 0;
-        mCurrentVisualMistakes = 0;
-        mCurrentAudioMistakes = 0;
+        mCurrentWrongs = 0;
+        mCurrentRights = 0;
+        
         mHistoryVisual = new ArrayList<Integer>(BLOCK_SIZE);
         mHistoryAudio = new ArrayList<Integer>(BLOCK_SIZE);
 
