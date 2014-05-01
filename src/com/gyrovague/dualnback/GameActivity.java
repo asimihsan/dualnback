@@ -105,7 +105,7 @@ public class GameActivity extends Activity {
                 // --------------------------------------------------------------------------------------
                 Thread createSoundManager = new Thread(new Runnable() {
                     public void run() {
-                        mSoundManager = new SoundManager(mDrawView.getContext(), mRNG);
+                        mSoundManager = new SoundManager(mDrawView.getContext());
                         if (mGameManager != null) {
                             mActivityState = ACT_STATE_CREATED;
                             mHandler.sendEmptyMessage(MSG_TYPE_INITIALIZE);

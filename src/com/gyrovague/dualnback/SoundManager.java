@@ -37,6 +37,25 @@ public class SoundManager {
     /**
      * Constructor.  Create all MediaPlayer instances up front.
      * @param context Context within which to play the sounds.
+     */
+    public SoundManager(Context context) {
+        this.mContext = context;
+        this.mRNG = null;
+        
+        // use chklqrst
+        mConsonantsInUse[0] = R.raw.c;
+        mConsonantsInUse[1] = R.raw.h;
+        mConsonantsInUse[2] = R.raw.k;
+        mConsonantsInUse[3] = R.raw.l;
+        mConsonantsInUse[4] = R.raw.q;
+        mConsonantsInUse[5] = R.raw.r;
+        mConsonantsInUse[6] = R.raw.s;
+        mConsonantsInUse[7] = R.raw.t;
+    } // SoundManager(Context context)
+
+    /**
+     * Constructor.  Create all MediaPlayer instances up front.
+     * @param context Context within which to play the sounds.
      * @param RNG Mersenne twister RNG.
      */
     public SoundManager(Context context, MersenneTwister RNG) {
@@ -57,7 +76,7 @@ public class SoundManager {
             } // if (set.contains(current_consonant) != true)
         } // while (marker < NUM_CONSONANTS)
     } // SoundManager(Context context, MersenneTwisterFast RNG)
-
+    
     /**
      * Allocate all required resources.
      */
@@ -166,7 +185,9 @@ public class SoundManager {
      * Play a random consonant.
      */
     public void playRandomConsonant() {
-        playSound(mRNG.nextInt(NUM_CONSONANTS));
+        if (mRNG != null) {
+            playSound(mRNG.nextInt(NUM_CONSONANTS));
+        }
     }
 
     /**
