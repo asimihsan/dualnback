@@ -116,11 +116,11 @@ public class GameActivity extends Activity {
                 Thread createGameManager = new Thread(new Runnable() {
                     public void run() {
                         mGameManager = new GameManager(mRNG);
-                        mGameManager.setmHandlerUI(mHandler);
+                        mGameManager.setHandlerUI(mHandler);
                         
                         // restore previous level
                         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-                        int nInterval = settings.getInt("nInterval", 1);
+                        int nInterval = settings.getInt("nInterval", GameManager.NINTERVAL_MIN);
                         mGameManager.setnInterval(nInterval);
                         
                         if (mSoundManager != null) {

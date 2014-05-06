@@ -51,7 +51,8 @@ import ec.util.MersenneTwister;
  */
 public class GameManager {
     private static final String TAG = "GameManager";
-    private int mNInterval = 1;
+    public static final int NINTERVAL_MIN = 2;
+    private int mNInterval = NINTERVAL_MIN;
     private double mRate = 0.0;
     private int mCurrentBlock;
     private int mCurrentTrial;
@@ -176,7 +177,7 @@ public class GameManager {
             }
             else {
               // fallback
-              mNInterval = Math.max(mNInterval - 1, 1);
+              setnInterval(mNInterval - 1);
               mnFallBackSessions = 0;
             }
         }
@@ -312,11 +313,11 @@ public class GameManager {
     }
 
     public void setnInterval(int nInterval) {
-        this.mNInterval = nInterval;
+        mNInterval = Math.max(nInterval, NINTERVAL_MIN);
     }
 
-    public void setmHandlerUI(Handler mHandlerUI) {
-        this.mHandlerUI = mHandlerUI;
+    public void setHandlerUI(Handler handlerUI) {
+        mHandlerUI = handlerUI;
     }
 
     public int getCurrentBlock() {
