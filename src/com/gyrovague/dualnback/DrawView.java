@@ -8,6 +8,7 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -23,14 +24,14 @@ public class DrawView extends View {
      *  Public bit field flags for determining which square in the grid
      *  to draw.
      */
-    public static final int TOP_LEFT		= 1 << 0;
-    public static final int TOP_MIDDLE		= 1 << 1;
-    public static final int TOP_RIGHT		= 1 << 2;
-    public static final int MIDDLE_LEFT		= 1 << 3;
-    public static final int MIDDLE_RIGHT	= 1 << 4;
-    public static final int BOTTOM_LEFT		= 1 << 5;
-    public static final int BOTTOM_MIDDLE	= 1 << 6;
-    public static final int BOTTOM_RIGHT	= 1 << 7;
+    public static final int TOP_LEFT        = 1 << 0;
+    public static final int TOP_MIDDLE        = 1 << 1;
+    public static final int TOP_RIGHT        = 1 << 2;
+    public static final int MIDDLE_LEFT        = 1 << 3;
+    public static final int MIDDLE_RIGHT    = 1 << 4;
+    public static final int BOTTOM_LEFT        = 1 << 5;
+    public static final int BOTTOM_MIDDLE    = 1 << 6;
+    public static final int BOTTOM_RIGHT    = 1 << 7;
     public static final int[] mPossibleSquares = {TOP_LEFT, TOP_MIDDLE, TOP_RIGHT, MIDDLE_LEFT, MIDDLE_RIGHT, BOTTOM_LEFT, BOTTOM_MIDDLE, BOTTOM_RIGHT};
 
     /**
@@ -51,7 +52,7 @@ public class DrawView extends View {
     private int mSquaresDrawn = 0;
 
     private Paint   mPaint = new Paint();
-    private String	mTag;
+    private String    mTag;
     private Resources mResources;
     private Handler mHandlerUI;
 
@@ -110,7 +111,9 @@ public class DrawView extends View {
                 // invisible
                 mPaint.setColor(mResources.getColor(R.drawable.transparent_background));
             }
-            canvas.drawRect(rect, mPaint);
+            RectF rectf = new RectF();
+            rectf.set(rect);
+            canvas.drawRoundRect(rectf, 5.0f, 5.0f, mPaint);
         }
 
         if (mHandlerUI != null) {
@@ -121,7 +124,7 @@ public class DrawView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         setupDrawingCoordinates();
-        mPaintWhiteCross.setStrokeWidth(mSquareSize / 16);
+        mPaintWhiteCross.setStrokeWidth(mSquareSize / 32);
     }
 
     /**
@@ -129,13 +132,13 @@ public class DrawView extends View {
      */
     private void drawWhiteCross(Canvas canvas) {
         canvas.drawLine(mRectCross.left + mRectCross.width() / 2,
-                        mRectCross.top,
+                        mRectCross.top + mRectCross.height() / 5,
                         mRectCross.left + mRectCross.width() / 2,
-                        mRectCross.bottom,
+                        mRectCross.bottom - mRectCross.height() / 5,
                         mPaintWhiteCross);
-        canvas.drawLine(mRectCross.left,
+        canvas.drawLine(mRectCross.left + mRectCross.width() / 5,
                         mRectCross.top + mRectCross.height() / 2,
-                        mRectCross.right,
+                        mRectCross.right - mRectCross.width() / 5,
                         mRectCross.top + mRectCross.height() / 2,
                         mPaintWhiteCross);
     }
@@ -166,14 +169,14 @@ public class DrawView extends View {
          * Rect(int left, int top, int right, int bottom)
          */
         mSquareToRect.clear();
-        mSquareToRect.put(TOP_LEFT,			new Rect(left+1*gap+0*square, top+1*gap+0*square, left+1*gap+1*square, top+1*gap+1*square));
-        mSquareToRect.put(TOP_MIDDLE,		new Rect(left+2*gap+1*square, top+1*gap+0*square, left+2*gap+2*square, top+1*gap+1*square));
-        mSquareToRect.put(TOP_RIGHT,		new Rect(left+3*gap+2*square, top+1*gap+0*square, left+3*gap+3*square, top+1*gap+1*square));
-        mSquareToRect.put(MIDDLE_LEFT,		new Rect(left+1*gap+0*square, top+2*gap+1*square, left+1*gap+1*square, top+2*gap+2*square));
-        mSquareToRect.put(MIDDLE_RIGHT, 	new Rect(left+3*gap+2*square, top+2*gap+1*square, left+3*gap+3*square, top+2*gap+2*square));
-        mSquareToRect.put(BOTTOM_LEFT, 		new Rect(left+1*gap+0*square, top+3*gap+2*square, left+1*gap+1*square, top+3*gap+3*square));
-        mSquareToRect.put(BOTTOM_MIDDLE, 	new Rect(left+2*gap+1*square, top+3*gap+2*square, left+2*gap+2*square, top+3*gap+3*square));
-        mSquareToRect.put(BOTTOM_RIGHT, 	new Rect(left+3*gap+2*square, top+3*gap+2*square, left+3*gap+3*square, top+3*gap+3*square));
+        mSquareToRect.put(TOP_LEFT,            new Rect(left+1*gap+0*square, top+1*gap+0*square, left+1*gap+1*square, top+1*gap+1*square));
+        mSquareToRect.put(TOP_MIDDLE,        new Rect(left+2*gap+1*square, top+1*gap+0*square, left+2*gap+2*square, top+1*gap+1*square));
+        mSquareToRect.put(TOP_RIGHT,        new Rect(left+3*gap+2*square, top+1*gap+0*square, left+3*gap+3*square, top+1*gap+1*square));
+        mSquareToRect.put(MIDDLE_LEFT,        new Rect(left+1*gap+0*square, top+2*gap+1*square, left+1*gap+1*square, top+2*gap+2*square));
+        mSquareToRect.put(MIDDLE_RIGHT,     new Rect(left+3*gap+2*square, top+2*gap+1*square, left+3*gap+3*square, top+2*gap+2*square));
+        mSquareToRect.put(BOTTOM_LEFT,         new Rect(left+1*gap+0*square, top+3*gap+2*square, left+1*gap+1*square, top+3*gap+3*square));
+        mSquareToRect.put(BOTTOM_MIDDLE,     new Rect(left+2*gap+1*square, top+3*gap+2*square, left+2*gap+2*square, top+3*gap+3*square));
+        mSquareToRect.put(BOTTOM_RIGHT,     new Rect(left+3*gap+2*square, top+3*gap+2*square, left+3*gap+3*square, top+3*gap+3*square));
 
         /**
          * Set the middle-middle square for the perpetual white cross.

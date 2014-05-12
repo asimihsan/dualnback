@@ -2,11 +2,11 @@
 <resources>
     <string name="hello">Hello World, Main!</string>
     <string name="app_name">DualNBack</string>
-    <string name="str_btn_audio_only">Audio</string>
-    <string name="str_btn_visual_only">Visual</string>
+    <string name="str_btn_audio">Audio</string>
+    <string name="str_btn_visual">Visual</string>
     <string name="str_btn_both">Both</string>
-    <string name="alert_current_interval_title">Current interval</string>
-    <string name="alert_current_interval_message_singular">Look out for repetitions {0} interval back.</string>
-    <string name="alert_current_interval_message_plural">Look out for repetitions {0} intervals back.</string>
+    <string name="alert_new_session">New session</string>
+    <string name="alert_interval_back_message">Look out for repetitions {0} interval(s) back.</string>
+    <string name="alert_rate_message">{0,number,percent} success rate. </string>
     <string name="progress_loading">Loading. Please wait...</string>    
 </resources>
