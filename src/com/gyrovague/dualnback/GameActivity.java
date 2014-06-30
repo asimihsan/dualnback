@@ -43,6 +43,12 @@ public class GameActivity extends Activity {
     private static long[] VIBRATE_PATTERN = new long[] { 250, 250, };
     public static final String PREFS_NAME = "prefs";
 
+    /** Button feedback types */
+    public static final int FEEDBACK_TYPE_NONE = 0;
+    public static final int FEEDBACK_TYPE_GOOD = 1;
+    public static final int FEEDBACK_TYPE_BAD  = 2;
+    public static final int FEEDBACK_TYPE_MISS = 3;
+    
     /**
      * Message types handled by and sent to the main UI thread.
      */
@@ -58,9 +64,10 @@ public class GameActivity extends Activity {
     public static final int MSG_TYPE_INITIALIZE_DONE   = 10;
     public static final int MSG_TYPE_NEW_BLOCK         = 11;
     public static final int MSG_TYPE_END_OF_DAY        = 12;
+    public static final int MSG_TYPE_CLEAR_FEEDBACK    = 13;
     public static final int[] ALL_MESSAGE_TYPES = new int[] {MSG_TYPE_NEW_TRIAL, MSG_TYPE_GUESS_AUDIO, MSG_TYPE_GUESS_VISUAL, MSG_TYPE_GUESS_VALIDATE,
             MSG_TYPE_HALT_VISUAL, MSG_TYPE_HALT_AUDIO, MSG_TYPE_DRAWING_DONE, MSG_TYPE_CREATE,
-            MSG_TYPE_INITIALIZE, MSG_TYPE_INITIALIZE_DONE, MSG_TYPE_NEW_BLOCK, MSG_TYPE_END_OF_DAY
+            MSG_TYPE_INITIALIZE, MSG_TYPE_INITIALIZE_DONE, MSG_TYPE_NEW_BLOCK, MSG_TYPE_END_OF_DAY, MSG_TYPE_CLEAR_FEEDBACK
                                                             };
 
     /**
@@ -253,6 +260,7 @@ public class GameActivity extends Activity {
             case MSG_TYPE_GUESS_VISUAL:
                 if (mActivityState == ACT_STATE_WAITING_FOR_GUESS) {
                     Log.d("Handler::handleMessage()", "Accept guess.");
+                    mHandler.removeMessages(MSG_TYPE_CLEAR_FEEDBACK);
                     processMessageGuess(msg.what);
                 }
                 break;
@@ -274,6 +282,11 @@ public class GameActivity extends Activity {
             case MSG_TYPE_HALT_AUDIO:
                 break;
 
+            case MSG_TYPE_CLEAR_FEEDBACK:
+                setButtonFeedback(mButtonAudio, FEEDBACK_TYPE_NONE);
+                setButtonFeedback(mButtonVisual, FEEDBACK_TYPE_NONE);
+                break;
+                
             case MSG_TYPE_END_OF_DAY:
                 Log.d("Main::Handler::handleMessage()::MSG_TYPE_END_OF_DAY", "Day is over.");
                 mActivityState = ACT_STATE_STOP;
@@ -397,20 +410,28 @@ public class GameActivity extends Activity {
     } // public void setAllButtonsEnabledState(boolean state)
 
     
-    public void setButtonFeedback(Button button, boolean isCorrect) {
+    public void setButtonFeedback(Button button, int feedbackType) {
         Log.d("Main::setButtonFeedback()", "entry");
-        if (isCorrect) {
+        switch (feedbackType) {
+        case FEEDBACK_TYPE_NONE:
+            button.setTextColor(Color.BLACK);
+            break;
+        case FEEDBACK_TYPE_GOOD:
             button.setTextColor(Color.GREEN);
-        }
-        else {
+            break;
+        case FEEDBACK_TYPE_BAD:
             button.setTextColor(Color.RED);
+            break;
+        case FEEDBACK_TYPE_MISS:
+            button.setTextColor(Color.BLUE);
+            break;
         }
     } // public void setAllButtonsEnabledState(boolean state)
     
    public void resetButtonsFeedback() {
         Log.d("Main::resetButtonsFeedback()", "entry");
         for (Button button : mAllButtons) {
-            button.setTextColor(Color.BLACK);
+            setButtonFeedback(button, FEEDBACK_TYPE_NONE);
         }
     }
     
@@ -432,11 +453,11 @@ public class GameActivity extends Activity {
         switch (msg_type) {
         case MSG_TYPE_GUESS_AUDIO:
             is_correct = mGameManager.evaluatePartialGuess(Guess.AUDIO);
-            setButtonFeedback(mButtonAudio, is_correct);
+            setButtonFeedback(mButtonAudio, is_correct ? FEEDBACK_TYPE_GOOD : FEEDBACK_TYPE_BAD);
             break;
         case MSG_TYPE_GUESS_VISUAL:
             is_correct = mGameManager.evaluatePartialGuess(Guess.VISUAL);
-            setButtonFeedback(mButtonVisual, is_correct);
+            setButtonFeedback(mButtonVisual, is_correct ? FEEDBACK_TYPE_GOOD : FEEDBACK_TYPE_BAD);
             break;
         default:
             // TODO raise exception.
@@ -452,11 +473,19 @@ public class GameActivity extends Activity {
         
         mActivityState = ACT_STATE_RECEIVED_GUESS;
         disableAll();
-        resetButtonsFeedback();
         boolean is_correct = mGameManager.evaluateGuess();
         Log.d(TAG+SUB_TAG, "is_correct: " + is_correct);
-        mHandler.sendEmptyMessage(MSG_TYPE_NEW_TRIAL);
+        
+        // mark miss
+        resetButtonsFeedback();
+        if (mGameManager.getAudioMiss())
+            setButtonFeedback(mButtonAudio, FEEDBACK_TYPE_MISS);
+        if (mGameManager.getVisualMiss())
+            setButtonFeedback(mButtonVisual, FEEDBACK_TYPE_MISS);
+        mHandler.sendEmptyMessageDelayed(MSG_TYPE_CLEAR_FEEDBACK, 500);
 
+        mHandler.sendEmptyMessage(MSG_TYPE_NEW_TRIAL);
+        
     } // private void validateGuess()
     
     public synchronized AlertDialog getmAlertDialog() {
@@ -475,7 +504,7 @@ public class GameActivity extends Activity {
     public Context getmContext() {
         return mContext;
     }
-
+  
     public MersenneTwister getmRNG() {
         return mRNG;
     }
