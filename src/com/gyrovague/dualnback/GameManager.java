@@ -59,6 +59,8 @@ public class GameManager {
     private int mCurrentGuess;
     private int mCurrentWrongs;
     private int mCurrentRights;
+    private boolean mAudioMiss;
+    private boolean mVisualMiss;
     private int mnFallBackSessions;
     private MersenneTwister mRNG;
     private ArrayList<Integer> mHistoryVisual;
@@ -94,6 +96,8 @@ public class GameManager {
     private void reset() {
         mCurrentBlock = 0;
         mCurrentGuess = Guess.NONE;
+        mAudioMiss = false;
+        mVisualMiss = false;
         mnFallBackSessions = 0;
     }
 
@@ -160,11 +164,14 @@ public class GameManager {
             mCurrentWrongs ++;
         }
         
+        mAudioMiss  = ((correct_answer & Guess.AUDIO) != 0) && ((mCurrentGuess & Guess.AUDIO) == 0);
+        mVisualMiss = ((correct_answer & Guess.VISUAL) != 0) && ((mCurrentGuess & Guess.VISUAL) == 0);
+        
         mCurrentGuess = Guess.NONE;
         mCurrentTrial ++;
         return is_guess_correct;
     }
-
+    
     public void advanceBlock() {
         mRate = 1.0 * mCurrentRights / (1.0 * mCurrentWrongs + 1.0 * mCurrentRights);
         if (mRate >= THRESHOLD_ADVANCE) {
@@ -322,6 +329,14 @@ public class GameManager {
 
     public int getCurrentBlock() {
         return mCurrentBlock;
+    }
+    
+    public boolean getAudioMiss() {
+        return mAudioMiss;
+    }
+    
+    public boolean getVisualMiss() {
+        return mVisualMiss;
     }
     
 }
